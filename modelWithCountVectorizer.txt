@@ -1,0 +1,95 @@
+# Construccion de un modelo de clasificación
+from sklearn.model_selection import train_test_split
+
+df_model = df_gigante.head(10000).copy()
+
+X = df_model.drop(columns=['Is Fraud?', 'User', 'Address', 'Latitude', 'Longitude', 'Errors?', 'Person', 'Apartment'])
+y = df_model['Is Fraud?']
+
+# Primero separamos los datos de entrenamiento y validación/test
+X_train, X_val_and_test, y_train, y_val_and_test = train_test_split(X, y, test_size=0.3, random_state=0, stratify=y)
+
+# Luego separamos los datos de validación y pruebas                                       0.5 x 0.3 = 0.15
+X_val, X_test, y_val, y_test = train_test_split(X_val_and_test, y_val_and_test, test_size=0.5, random_state=0, stratify=y_val_and_test)
+
+
+
+from sklearn.feature_extraction.text import CountVectorizer
+
+# Use Chip
+chip_mapping = {
+    "Swipe Transaction": 0,
+    "Chip Transaction": 1,
+    "Online Transaction": 2
+}
+
+X_train['Use Chip'] = X_train['Use Chip'].replace(chip_mapping).astype(int)
+X_val['Use Chip'] = X_val['Use Chip'].replace(chip_mapping).astype(int)
+
+# Gender
+gender_mapping = {
+    "Male": 0,
+    "Female": 1
+}
+
+X_train['Gender'] = X_train['Gender'].replace(gender_mapping).astype(int)
+X_val['Gender'] = X_val['Gender'].replace(gender_mapping).astype(int)
+
+count_vectorizer = CountVectorizer()
+
+# Merchant City
+X_train_city = count_vectorizer.fit_transform(X_train['Merchant City'].fillna(''))
+X_val_city = count_vectorizer.transform(X_val['Merchant City'].fillna(''))
+
+X_train_city_df = pd.DataFrame(X_train_city.toarray(), columns=count_vectorizer.get_feature_names_out(), index=X_train.index)
+X_val_city_df = pd.DataFrame(X_val_city.toarray(), columns=count_vectorizer.get_feature_names_out(), index=X_val.index)
+
+X_train = pd.concat([X_train, X_train_city_df], axis=1).drop(columns=['Merchant City'])
+X_val = pd.concat([X_val, X_val_city_df], axis=1).drop(columns=['Merchant City'])
+
+# Merchant State
+X_train_State = count_vectorizer.fit_transform(X_train['Merchant State'].fillna(''))
+X_val_State = count_vectorizer.transform(X_val['Merchant State'].fillna(''))
+
+X_train_State_df = pd.DataFrame(X_train_State.toarray(), columns=count_vectorizer.get_feature_names_out(), index=X_train.index)
+X_val_State_df = pd.DataFrame(X_val_State.toarray(), columns=count_vectorizer.get_feature_names_out(), index=X_val.index)
+
+X_train = pd.concat([X_train, X_train_State_df], axis=1).drop(columns=['Merchant State'])
+X_val = pd.concat([X_val, X_val_State_df], axis=1).drop(columns=['Merchant State'])
+
+# City
+X_train_city = count_vectorizer.fit_transform(X_train['City'].fillna(''))
+X_val_city = count_vectorizer.transform(X_val['City'].fillna(''))
+
+X_train_city_df = pd.DataFrame(X_train_city.toarray(), columns=count_vectorizer.get_feature_names_out(), index=X_train.index)
+X_val_city_df = pd.DataFrame(X_val_city.toarray(), columns=count_vectorizer.get_feature_names_out(), index=X_val.index)
+
+X_train = pd.concat([X_train, X_train_city_df], axis=1).drop(columns=['City'])
+X_val = pd.concat([X_val, X_val_city_df], axis=1).drop(columns=['City'])
+
+# State
+X_train_State = count_vectorizer.fit_transform(X_train['State'].fillna(''))
+X_val_State = count_vectorizer.transform(X_val['State'].fillna(''))
+
+X_train_State_df = pd.DataFrame(X_train_State.toarray(), columns=count_vectorizer.get_feature_names_out(), index=X_train.index)
+X_val_State_df = pd.DataFrame(X_val_State.toarray(), columns=count_vectorizer.get_feature_names_out(), index=X_val.index)
+
+X_train = pd.concat([X_train, X_train_State_df], axis=1).drop(columns=['State'])
+X_val = pd.concat([X_val, X_val_State_df], axis=1).drop(columns=['State'])
+
+
+
+# Construccion de un modelo de clasificación
+from sklearn.model_selection import train_test_split
+
+df_model = df_gigante.head(1000000).copy()
+
+X = df_model.drop(columns=['Is Fraud?', 'User', 'Address', 'Latitude', 'Longitude', 'Errors?', 'Person', 'Apartment', 'City', 'State', 'Merchant City', 'Merchant State', 'Use Chip', 'Gender', 'Per Capita Income - Zipcode', 'Yearly Income - Person', 'Total Debt'])
+y = df_model['Is Fraud?']
+
+# Primero separamos los datos de entrenamiento y validación/test
+X_train, X_val_and_test, y_train, y_val_and_test = train_test_split(X, y, test_size=0.3, random_state=0, stratify=y)
+
+# Luego separamos los datos de validación y pruebas                                       0.5 x 0.3 = 0.15
+X_val, X_test, y_val, y_test = train_test_split(X_val_and_test, y_val_and_test, test_size=0.5, random_state=0, stratify=y_val_and_test)
+
